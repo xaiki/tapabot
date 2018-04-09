@@ -211,11 +211,6 @@ const handlers = {
     'search': search
 }
 
-Object.keys(handlers).forEach(k => {
-    debug('instaling handler for:', k)
-    bot.onText(new RegExp(`\/${k} ?(.*)`), handlers[k])
-})
-
 bot.on('callback_query', (cbq) => {
     const [action, args] = cbq.data.split(' ');
     const msg = cbq.message;
@@ -228,3 +223,30 @@ bot.on('callback_query', (cbq) => {
     bot.editMessageText(`${action} → ${args}`, opts);
 })
 
+
+bot.getMe().then(({first_name, username}) => {
+    let meRegExps = [
+        new RegExp(`${first_name} (\w+) ?(.*)`),
+        new RegExp(`${username} (\w+) ?(.*)`)
+    ]
+
+    bot.on('message', (msg) => {
+        const chatId = msg.chat.id;
+
+        meRegExps.forEach(r => {
+            if (msg.text.match(r)) {
+                bot.sendMessage(chatId, 'yes please')
+            }
+        })
+
+        debug('got', msg)
+    })
+
+    Object.keys(handlers).forEach(k => {
+        debug('instaling handler for:', k)
+
+        bot.onText(new RegExp(`\/${k} ?(.*)`), handlers[k])
+        bot.onText(new RegExp(`\/@?${first_name} ${k} ?(.*)`), handlers[k])
+        bot.onText(new RegExp(`\/@?${username} ${k} ?(.*)`), handlers[k])
+    })
+})
