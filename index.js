@@ -132,7 +132,7 @@ function imgURLisToday(url) {
     return nm.format('YYYY/MM/DD') === moment().format('YYYY/MM/DD')
 }
 
-function get10Days(newspaper, cover) {
+function get10Days(cover) {
     let [, y, m, d, highUrl] = parseImgURL(cover.high)
 
     let ret = {}
@@ -140,7 +140,7 @@ function get10Days(newspaper, cover) {
 
     for (let i = 0; i < 10; i += 1) {
         let dt = nm.format('YYYY/MM/DD')
-        ret[`${newspaper} (${dt})`] = {high: `${IMG_BASE_URL}/${dt}/${highUrl}`}
+        ret[`${cover.name} (${dt})`] = {high: `${IMG_BASE_URL}/${dt}/${highUrl}`}
         nm.subtract(1, 'days')
     }
 
@@ -181,7 +181,7 @@ function getCovers(msg, match) {
     }
 
     let newspapers = newspaper && countries[country].newspapers[newspaper]
-                   ? get10Days(newspaper, countries[country].newspapers[newspaper])
+                   ? get10Days(countries[country].newspapers[newspaper])
                    : filterToday(countries[country].newspapers)
 
     return sendNewsPapers(chatId, country, newspapers)
