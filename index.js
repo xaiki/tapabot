@@ -218,7 +218,7 @@ const handlers = {
 }
 
 bot.on('callback_query', (cbq) => {
-    const [action, args] = cbq.data.split(' ');
+    const [,action, args] = cbq.data.match(/(\w+) ?(.*)/)
     const msg = cbq.message;
     const opts = {
         chat_id: msg.chat.id,
