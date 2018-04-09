@@ -54,7 +54,9 @@ axios.get(BASE_URL)
                                      const newspapers = {}
 
                                      $(res.data).find('.thcover img').map((i, e) => {
-                                         newspapers[$(e).attr('alt')] = {
+                                         const name = $(e).attr('alt')
+                                         newspapers[name] = {
+                                             name: name,
                                              low: $(e).attr('src'),
                                              high: $(e).attr('src').replace('200', '750')
                                          }
@@ -66,6 +68,7 @@ axios.get(BASE_URL)
                                  .then(newspapers => (Object.assign(countries, {
                                      [`${countryName}`]: {
                                          url: countryURL,
+                                         name: countryName,
                                          newspapers: newspapers
                                      }
                                  })))
@@ -79,6 +82,7 @@ axios.get(BASE_URL)
                                    return Object.assign(zones, {
                                        [`${zoneName}`]: {
                                            url: zone,
+                                           name: zoneName,
                                            countries: countries
                                        }
                                    })})
