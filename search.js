@@ -6,12 +6,12 @@ class fuzzySearch {
     constructor(
         items,
         resolve = (e) => (e),
-        opts = {
+        opts
+    ) {
+        this.opts = Object.assign({}, {
             maxSearchResults: 3, // used for debug only
             maxDistance: 0.001   // this is set by trial and error
-        }
-    ) {
-        this.opts = opts
+        }, opts)
         this.resolve = resolve
         this.stringMap = this.load(items, opts)
     }
