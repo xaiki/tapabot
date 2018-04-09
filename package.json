@@ -1,0 +1,25 @@
+{
+  "name": "telegram-newspaper-cover-bot",
+  "scripts": {
+    "start": "node index.js",
+    "build": "node get-zones.js",
+    "lint": "eslint *.js"
+  },
+  "version": "0.0.1",
+  "description": "A telegram bot that sends you selected news paper covers, as they appear",
+  "main": "index.js",
+  "repository": "https://github.com/xaiki/telegram-newspaper-cover-bot",
+  "author": "Niv Sardi <x@btn.sh>",
+  "license": "GPLv3",
+  "dependencies": {
+    "chokidar": "^2.0.3",
+    "debug": "^3.1.0",
+    "moment": "^2.22.0",
+    "node-telegram-bot-api": "^0.30.0"
+  },
+  "devDependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "eslint": "^4.19.1"
+  }
+}
