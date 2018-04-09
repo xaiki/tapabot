@@ -16,12 +16,12 @@ const watcher = chokidar.watch(Object.values(FILES), {
 const token = auth.API_KEY;
 
 let zones = require(FILES.ZONES)
-let zonesFuzzy = new FuzzySearch (zones, (msg, z) => (
+let zonesFuzzy = new FuzzySearch (zones, {}, (msg, z) => (
     getCountries(msg, z.name)
 ))
 
 let countries = require(FILES.COUNTRIES)
-let countriesFuzzy = new FuzzySearch (countries, (msg, c) => {
+let countriesFuzzy = new FuzzySearch (countries, {}, (msg, c) => {
     const chatId = msg.chat.id
 
     let newspapers = filterToday(c.newspapers)
@@ -30,7 +30,7 @@ let countriesFuzzy = new FuzzySearch (countries, (msg, c) => {
 })
 
 let newspapers = require(FILES.NEWSPAPERS)
-let newspapersFuzzy = new FuzzySearch (newspapers, (msg, n) => {
+let newspapersFuzzy = new FuzzySearch (newspapers, {maxDistance: 2}, (msg, n) => {
     const chatId = msg.chat.id
 
     let newspapers = get10Days(n)

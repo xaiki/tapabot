@@ -5,8 +5,8 @@ const debug = require('debug')('tapa-bot:search')
 class fuzzySearch {
     constructor(
         items,
+        opts,
         resolve = (e) => (e),
-        opts
     ) {
         this.opts = Object.assign({}, {
             maxSearchResults: 3, // used for debug only
