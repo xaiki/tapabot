@@ -4,7 +4,7 @@ const chokidar = require('chokidar');
 const moment = require('moment');
 const debug = require('debug')('tapa-bot')
 
-const {IMG_BASE_URL} = require('./config')
+const {IMG_BASE_URL, IMG_DATE_REGEXP} = require('./config')
 const watcher = chokidar.watch('./zones.json', {
     persistent: true
 });
@@ -70,9 +70,7 @@ function start(msg) {
     getZones(msg)
 }
 
-function sendNewsPapers(chatId, country, newspapers)  {
-    let entries = Object.entries(newspapers)
-    debug("newspapers: ", newspapers)
+function sendNewsPapers(chatId, country, entries)  {
     let i = 0
     do {
         debug('entries', entries)
@@ -89,9 +87,19 @@ function sendNewsPapers(chatId, country, newspapers)  {
     } while (i < entries.length);
 }
 
+function parseImgURL(url) {
+    return url.match(new RegExp(`${IMG_BASE_URL}/${IMG_DATE_REGEXP}/(.*)`))
+}
+
+function imgURLisToday(url) {
+    let [_, y, m, d] = parseImgURL(url)
+
+    let nm = moment(`${y}${m}${d}`)
+    return nm.format('YYYY/MM/DD') === moment().format('YYYY/MM/DD')
+}
+
 function get10Days(newspaper, cover) {
-    let [_, y, m, d, highUrl] =
-        cover.high.match(new RegExp(`${IMG_BASE_URL}/([0-9]+)/([0-9]+)/([0-9]+)/(.*)`))
+    let [_, y, m, d, highUrl] = parseImgURL(cover.high)
 
     let ret = {}
     let nm = moment(`${y}${m}${d}`)
@@ -102,7 +110,12 @@ function get10Days(newspaper, cover) {
         nm.subtract(1, 'days')
     }
 
-    return ret
+    return Object.entries(ret)
+}
+
+function filterToday(newspapers) {
+    let entries = Object.entries(newspapers)
+    return entries.filter(e => imgURLisToday(e[1].high))
 }
 
 function getCovers(msg, match) {
@@ -137,7 +150,7 @@ function getCovers(msg, match) {
 
     let newspapers = newspaper && countries[country].newspapers[newspaper]
                    ? get10Days(newspaper, countries[country].newspapers[newspaper])
-                   : countries[country].newspapers
+                   : filterToday(countries[country].newspapers)
 
     return sendNewsPapers(chatId, country, newspapers)
 }
