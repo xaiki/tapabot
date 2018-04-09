@@ -126,14 +126,14 @@ function parseImgURL(url) {
 }
 
 function imgURLisToday(url) {
-    let [_, y, m, d] = parseImgURL(url)
+    let [, y, m, d] = parseImgURL(url)
 
     let nm = moment(`${y}${m}${d}`)
     return nm.format('YYYY/MM/DD') === moment().format('YYYY/MM/DD')
 }
 
 function get10Days(newspaper, cover) {
-    let [_, y, m, d, highUrl] = parseImgURL(cover.high)
+    let [, y, m, d, highUrl] = parseImgURL(cover.high)
 
     let ret = {}
     let nm = moment(`${y}${m}${d}`)
