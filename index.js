@@ -4,7 +4,10 @@ const chokidar = require('chokidar');
 const moment = require('moment');
 const debug = require('debug')('tapa-bot')
 
+const FuzzySearch = require('./search');
+
 const {IMG_BASE_URL, IMG_DATE_REGEXP, FILES} = require('./config')
+
 const watcher = chokidar.watch(Object.values(FILES), {
     persistent: true
 });
@@ -13,15 +16,39 @@ const watcher = chokidar.watch(Object.values(FILES), {
 const token = auth.API_KEY;
 
 let zones = require(FILES.ZONES)
+let zonesFuzzy = new FuzzySearch (zones, (msg, z) => (
+    getCountries(msg, z.name)
+))
+
 let countries = require(FILES.COUNTRIES)
+let countriesFuzzy = new FuzzySearch (countries, (msg, c) => {
+    const chatId = msg.chat.id
+
+    let newspapers = filterToday(c.newspapers)
+
+    return sendNewsPapers(chatId, c.name, newspapers)
+})
+
 let newspapers = require(FILES.NEWSPAPERS)
+let newspapersFuzzy = new FuzzySearch (newspapers, (msg, n) => {
+    const chatId = msg.chat.id
+
+    let newspapers = get10Days(n)
+
+    return sendNewsPapers(chatId, 'UNSUPPORTED', newspapers)
+})
 
 function reload(path) {
     debug(`reloading everything because ${path} changed`)
 
     zones = require(FILES.ZONES)
+    zonesFuzzy.load(zones)
+
     countries = require(FILES.COUNTRIES)
+    countriesFuzzy.load(countries)
+
     newspapers = require(FILES.NEWSPAPERS)
+    newspapersFuzzy.load(newspapers)
 }
 
 watcher.on('change', reload)
@@ -160,12 +187,28 @@ function getCovers(msg, match) {
     return sendNewsPapers(chatId, country, newspapers)
 }
 
+function search (msg, match) {
+    const [ , term] = match
+
+    debug('search', term)
+    newspapersFuzzy.search(term, msg)
+                   .catch(e =>
+                       countriesFuzzy
+                           .search(term, msg)
+                           .catch(e =>
+                               zonesFuzzy
+                                   .search(term, msg)
+                                   .catch(e => debug(`couldn't find ${term} in newspapers, countries or zones`))
+                           ))
+                   .then((r) => debug(r))
+}
 
 const handlers = {
     'zones': getZones,
     'countries': getCountries,
     'start': start,
-    'get': getCovers
+    'get': getCovers,
+    'search': search
 }
 
 Object.keys(handlers).forEach(k => {
