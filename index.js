@@ -146,8 +146,6 @@ function getCovers(msg, match) {
         return bot.sendMessage(chatId, usage())
     }
 
-    setTimeout(() => start(msg), 2000)
-
     let newspapers = newspaper && countries[country].newspapers[newspaper]
                    ? get10Days(newspaper, countries[country].newspapers[newspaper])
                    : filterToday(countries[country].newspapers)
