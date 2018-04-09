@@ -65,18 +65,27 @@ function usage() {
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
 
+function makeRowsKeyboard(keys, transform, rows = 3) {
+    let keyboard = []
+    while (keys.length) {
+        keyboard.push(keys.splice(0, rows).map((k) => ({
+            text: k,
+            callback_data: transform(k)
+        })))
+    }
+
+    return keyboard
+}
+
 function getZones(msg) {
     const chatId = msg.chat.id;
     let user = msg.from.first_name
 
+    let keyboard = makeRowsKeyboard(Object.keys(zones), (z) => (`countries ${z}`))
+
     bot.sendMessage(chatId, `Ok ${user}, choose a zone`, {
         "reply_markup": {
-            "inline_keyboard": Object.keys(zones).map(z => ([
-                {
-                    text: z,
-                    callback_data: `countries ${z}`
-                }
-            ]))
+            "inline_keyboard": keyboard
         }
     });
 }
@@ -88,14 +97,11 @@ function getCountries(msg, match) {
     let user = msg.from.first_name
     let res = zones[zone].countries
 
+    let keyboard = makeRowsKeyboard(Object.keys(res), (c) => (`get ${zone}/${c}`))
+
     bot.sendMessage(chatId, `Ok ${user}, choose a country`, {
         "reply_markup": {
-            "inline_keyboard": Object.keys(res).map(c => ([
-                {
-                    text: `${zone}/${c}`,
-                    callback_data: `get ${zone}/${c}`
-                }
-            ]))
+            "inline_keyboard": keyboard
         }
     });
 }
