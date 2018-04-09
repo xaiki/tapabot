@@ -190,6 +190,8 @@ function getCovers(msg, match) {
 function search (msg, match) {
     const [ , term] = match
 
+    const chatId = msg.chat.id
+
     debug('search', term)
     newspapersFuzzy.search(term, msg)
                    .catch(e =>
@@ -198,7 +200,11 @@ function search (msg, match) {
                            .catch(e =>
                                zonesFuzzy
                                    .search(term, msg)
-                                   .catch(e => debug(`couldn't find ${term} in newspapers, countries or zones`))
+                                   .catch(e => {
+                                       let msg = `couldn't find \`${term}\` in newspapers, countries or zones`
+                                       debug(msg)
+                                       bot.sendMessage(chatId, msg)
+                                   })
                            ))
                    .then((r) => debug(r))
 }
