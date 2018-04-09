@@ -3,14 +3,25 @@ const fs = require('fs')
 const $ = require('cheerio')
 const debug = require('debug')('tapa-bot-get-zones')
 
-const {BASE_URL, ZONES_FILE} = require('./config')
+const {BASE_URL, FILES} = require('./config')
 
-debug('writting to', ZONES_FILE)
+debug('writting to', FILES.ZONES, FILES.COUNTRIES, FILES.NEWSPAPERS)
+
+let newspaperCache = {}
+let countryCache = {}
 
 let debugPromise = (name) => ((args) =>{
     debug('DEBUG:', name,  args)
     return args
 })
+
+let promiseWriteFile = (file, data) => (
+    new Promise((accept, reject) => (
+        fs.writeFile(file, JSON.stringify(data), (err) => (
+            err ? reject(err) : accept(file)
+        ))
+    ))
+)
 
 axios.get(BASE_URL)
      .then((res) => {
@@ -49,10 +60,7 @@ axios.get(BASE_URL)
                                          }
                                      })
 
-                                     return newspapers
-                                 })
-                                 .then(newspapers => {
-                                     debug('got', zoneName, countryName)
+                                     newspaperCache = Object.assign(newspaperCache, newspapers)
                                      return newspapers
                                  })
                                  .then(newspapers => (Object.assign(countries, {
@@ -63,13 +71,17 @@ axios.get(BASE_URL)
                                  })))
                  })
 
+
                  return Promise.all(countryPromises.get())
-                               .then(() => (Object.assign(zones, {
-                                   [`${zoneName}`]: {
-                                       url: zone,
-                                       countries: countries
-                                   }
-                               })))
+                               .then(() => {
+                                   countryCache = Object.assign(countryCache, countries)
+
+                                   return Object.assign(zones, {
+                                       [`${zoneName}`]: {
+                                           url: zone,
+                                           countries: countries
+                                       }
+                                   })})
              })
 
          debug(zonePromises.get())
@@ -78,10 +90,12 @@ axios.get(BASE_URL)
                        .then(() => zones)
      })
      .then(debugPromise('end'))
-     .then(JSON.stringify)
-     .then((data) => (new Promise((accept, reject) => (
-         fs.writeFile(ZONES_FILE, data, (err) => (
-             err ? reject(err) : accept(ZONES_FILE)
-         ))
-     ))))
+     .then((data) => (Promise.all([
+         promiseWriteFile(FILES.ZONES, data),
+         promiseWriteFile(FILES.COUNTRIES, countryCache),
+         promiseWriteFile(FILES.NEWSPAPERS, newspaperCache)
+     ])))
+     .then(() => {
+         debug('NEWSPAPERS', JSON.stringify(newspaperCache, null, 4))
+     })
      .catch(err => debug('GOT ERROR', err))

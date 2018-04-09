@@ -4,20 +4,27 @@ const chokidar = require('chokidar');
 const moment = require('moment');
 const debug = require('debug')('tapa-bot')
 
-const {IMG_BASE_URL, IMG_DATE_REGEXP} = require('./config')
-const watcher = chokidar.watch('./zones.json', {
+const {IMG_BASE_URL, IMG_DATE_REGEXP, FILES} = require('./config')
+const watcher = chokidar.watch(Object.values(FILES), {
     persistent: true
 });
 
 // replace the value below with the Telegram token you receive from @BotFather
 const token = auth.API_KEY;
 
-let zones = require('./zones')
+let zones = require(FILES.ZONES)
+let countries = require(FILES.COUNTRIES)
+let newspapers = require(FILES.NEWSPAPERS)
 
-watcher.on('change', path => {
-    debug('reloading data', path)
-    zones = require('./zones')
-})
+function reload(path) {
+    debug(`reloading everything because ${path} changed`)
+
+    zones = require(FILES.ZONES)
+    countries = require(FILES.COUNTRIES)
+    newspapers = require(FILES.NEWSPAPERS)
+}
+
+watcher.on('change', reload)
 
 function usage() {
     return `
