@@ -77,17 +77,21 @@ function makeRowsKeyboard(keys, transform, rows = 3) {
     return keyboard
 }
 
+function inlineRowsKeyboard(keys, transform, rows) {
+    return {
+        "reply_markup": {
+            "inline_keyboard": makeRowsKeyboard(keys, transform, rows)
+        }
+    }
+}
+
 function getZones(msg) {
     const chatId = msg.chat.id;
     let user = msg.from.first_name
 
-    let keyboard = makeRowsKeyboard(Object.keys(zones), (z) => (`countries ${z}`))
+    let keyboard = inlineRowsKeyboard(Object.keys(zones), (z) => (`countries ${z}`))
 
-    bot.sendMessage(chatId, `Ok ${user}, choose a zone`, {
-        "reply_markup": {
-            "inline_keyboard": keyboard
-        }
-    });
+    bot.sendMessage(chatId, `Ok ${user}, choose a zone`, keyboard);
 }
 
 function getCountries(msg, match) {
@@ -97,13 +101,9 @@ function getCountries(msg, match) {
     let user = msg.from.first_name
     let res = zones[zone].countries
 
-    let keyboard = makeRowsKeyboard(Object.keys(res), (c) => (`get ${zone}/${c}`))
+    let keyboard = inlineRowsKeyboard(Object.keys(res), (c) => (`get ${zone}/${c}`))
 
-    bot.sendMessage(chatId, `Ok ${user}, choose a country`, {
-        "reply_markup": {
-            "inline_keyboard": keyboard
-        }
-    });
+    bot.sendMessage(chatId, `Ok ${user}, choose a country`, keyboard);
 }
 
 function start(msg) {
