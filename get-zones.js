@@ -85,7 +85,8 @@ axios.get(BASE_URL)
                                            name: zoneName,
                                            countries: countries
                                        }
-                                   })})
+                                   })
+                               })
              })
 
          debug(zonePromises.get())
@@ -103,3 +104,4 @@ axios.get(BASE_URL)
          debug('NEWSPAPERS', JSON.stringify(newspaperCache, null, 4))
      })
      .catch(err => debug('GOT ERROR', err))
+

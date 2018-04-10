@@ -16,12 +16,12 @@ const watcher = chokidar.watch(Object.values(FILES), {
 const token = auth.API_KEY;
 
 let zones = require(FILES.ZONES)
-let zonesFuzzy = new FuzzySearch (zones, {}, (msg, z) => (
+let zonesFuzzy = new FuzzySearch(zones, {}, (msg, z) => (
     getCountries(msg, z.name)
 ))
 
 let countries = require(FILES.COUNTRIES)
-let countriesFuzzy = new FuzzySearch (countries, {}, (msg, c) => {
+let countriesFuzzy = new FuzzySearch(countries, {}, (msg, c) => {
     const chatId = msg.chat.id
 
     let newspapers = filterToday(c.newspapers)
@@ -30,7 +30,7 @@ let countriesFuzzy = new FuzzySearch (countries, {}, (msg, c) => {
 })
 
 let newspapers = require(FILES.NEWSPAPERS)
-let newspapersFuzzy = new FuzzySearch (newspapers, {maxDistance: 0.0001}, (msg, n) => {
+let newspapersFuzzy = new FuzzySearch(newspapers, {maxDistance: 0.0001}, (msg, n) => {
     const chatId = msg.chat.id
 
     let newspapers = get10Days(n)
@@ -194,24 +194,21 @@ function getCovers(msg, match) {
 }
 
 function search (msg, match) {
-    const [ , term] = match
+    const [, term] = match
 
     const chatId = msg.chat.id
 
     debug('search', term)
     newspapersFuzzy.search(term, msg)
-                   .catch(e =>
-                       countriesFuzzy
+                   .catch(e => countriesFuzzy
                            .search(term, msg)
-                           .catch(e =>
-                               zonesFuzzy
+                           .catch(e => zonesFuzzy
                                    .search(term, msg)
                                    .catch(e => {
                                        let msg = `couldn't find \`${term}\` in newspapers, countries or zones`
                                        debug(msg)
                                        bot.sendMessage(chatId, msg)
-                                   })
-                           ))
+                                   })))
                    .then((r) => debug(r))
 }
 
@@ -224,7 +221,7 @@ const handlers = {
 }
 
 bot.on('callback_query', (cbq) => {
-    const [,action, args] = cbq.data.match(/(\w+) ?(.*)/)
+    const [, action, args] = cbq.data.match(/(\w+) ?(.*)/)
     const msg = cbq.message;
     const opts = {
         chat_id: msg.chat.id,
@@ -262,3 +259,4 @@ bot.getMe().then(({first_name, username}) => {
         bot.onText(new RegExp(`\/@?${username} ${k} ?(.*)`), handlers[k])
     })
 })
+
