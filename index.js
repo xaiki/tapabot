@@ -30,7 +30,7 @@ let countriesFuzzy = new FuzzySearch (countries, {}, (msg, c) => {
 })
 
 let newspapers = require(FILES.NEWSPAPERS)
-let newspapersFuzzy = new FuzzySearch (newspapers, {maxDistance: 0.1}, (msg, n) => {
+let newspapersFuzzy = new FuzzySearch (newspapers, {maxDistance: 0.0001}, (msg, n) => {
     const chatId = msg.chat.id
 
     let newspapers = get10Days(n)
